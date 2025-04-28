@@ -1,0 +1,43 @@
+
+-- Create a table for borrow requests
+CREATE TABLE public.borrow_requests (
+  id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
+  created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(),
+  status TEXT NOT NULL DEFAULT 'pending',
+  book_id UUID NOT NULL REFERENCES public.books(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL,
+  CONSTRAINT valid_status CHECK (status IN ('pending', 'approved', 'rejected'))
+);
+
+-- Add Row Level Security
+ALTER TABLE public.borrow_requests ENABLE ROW LEVEL SECURITY;
+
+-- Allow students to view their own requests
+CREATE POLICY "Users can view their own borrow requests" 
+ON public.borrow_requests 
+FOR SELECT 
+USING (auth.uid() = user_id);
+
+-- Allow students to create borrow requests
+CREATE POLICY "Users can create borrow requests" 
+ON public.borrow_requests 
+FOR INSERT 
+WITH CHECK (auth.uid() = user_id);
+
+-- Allow administrators to view all borrow requests
+CREATE POLICY "Admins can view all borrow requests" 
+ON public.borrow_requests 
+FOR SELECT 
+USING (EXISTS (
+  SELECT 1 FROM public.profiles 
+  WHERE id = auth.uid() AND department = 'admin'
+));
+
+-- Allow administrators to update borrow requests
+CREATE POLICY "Admins can update borrow requests" 
+ON public.borrow_requests 
+FOR UPDATE 
+USING (EXISTS (
+  SELECT 1 FROM public.profiles 
+  WHERE id = auth.uid() AND department = 'admin'
+));

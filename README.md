@@ -45,7 +45,7 @@ bash
 Copy
 Edit
 npm run dev
-Open your browser at http://localhost:5173
+Open your browser at your domain (https://preview-17e2b1e5--krmu-library.lovable.app/)
 
 📁 Project Structure
 php

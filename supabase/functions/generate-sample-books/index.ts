@@ -7,7 +7,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Database of books organized by department
+
 const departmentBooks = {
   "School of Engineering and Technology (SOET)": [
     { title: "Introduction to Algorithms", author: "Thomas H. Cormen", description: "A comprehensive guide to understanding algorithms in computer science." },
@@ -156,12 +156,12 @@ const departmentBooks = {
 };
 
 serve(async (req) => {
-  // Handle CORS preflight requests
+  
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
-  // Only allow POST requests
+ 
   if (req.method !== 'POST') {
     return new Response(JSON.stringify({ error: 'Method not allowed' }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -170,13 +170,13 @@ serve(async (req) => {
   }
 
   try {
-    // Create Supabase client
+    
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    // Check if we already have books - avoid duplicating
+    
     const { data: existingBooks, error: countError } = await supabaseClient
       .from('books')
       .select('*', { count: 'exact', head: true });
@@ -196,7 +196,7 @@ serve(async (req) => {
       });
     }
 
-    // Generate books for each department
+    
     const allBooks = [];
     for (const [department, books] of Object.entries(departmentBooks)) {
       const deptBooks = books.map(book => ({
@@ -210,7 +210,7 @@ serve(async (req) => {
       allBooks.push(...deptBooks);
     }
 
-    // Insert books into the database in batches of 20
+    
     const batchSize = 20;
     let insertedCount = 0;
     
